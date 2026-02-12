@@ -1,0 +1,144 @@
+.music-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 15px;
+}
+
+.music-table th {
+  text-align: left;
+  padding: 10px;
+  border-bottom: 2px solid #ddd;
+  color: #555;
+}
+
+.music-table td {
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+}
+
+.song-row {
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.song-row:hover {
+  background: #f5f7fa;
+}
+
+.arrow {
+  width: 20px;
+  color: #888;
+  transition: transform 0.2s ease;
+}
+
+.song-row.open .arrow {
+  transform: rotate(90deg);
+}
+
+.song-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.cover {
+  width: 48px;
+  height: 48px;
+  border-radius: 6px;
+  object-fit: cover;
+}
+
+.title {
+  font-weight: 600;
+}
+
+.artist {
+  font-size: 13px;
+  color: #777;
+}
+
+.details-row {
+  display: none;
+  background: #fafafa;
+}
+
+.details-content {
+  display: flex;
+  gap: 32px;
+  padding: 24px;
+  align-items: flex-start;
+}
+
+.cover-large {
+  width: 180px;
+  height: 180px;
+  border-radius: 12px;
+  object-fit: cover;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.details-main {
+  flex: 1;
+  max-width: 1000px;
+}
+
+.song-title-big {
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.details-main audio {
+  width: 100%;
+  margin: 10px 0;
+}
+
+.song-meta {
+  font-size: 0.9rem;
+  color: #666;
+  margin-bottom: 14px;
+}
+
+.lyrics-toggle {
+  background: #f0f2f5;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  margin-bottom: 10px;
+  transition: background 0.2s ease, transform 0.1s ease;
+}
+
+.lyrics-toggle:hover {
+  background: #e4e6ea;
+}
+
+.lyrics-toggle:active {
+  transform: scale(0.97);
+}
+
+.lyrics {
+  white-space: pre-wrap;
+  line-height: 1.6;
+  font-size: 0.95rem;
+
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background: #ffffff;
+
+  padding: 14px;
+  width: 100%;
+}
+
+.lyrics.collapsed {
+  max-height: 6.5em;
+  overflow-y: auto;
+}
+
+.pager {
+  margin-top: 24px;
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}

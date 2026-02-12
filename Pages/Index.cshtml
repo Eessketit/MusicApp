@@ -1,0 +1,381 @@
+﻿@page
+@model IndexModel
+
+<h2>Music Application</h2>
+
+<form method="get" id="toolbar" class="mb-3">
+    <div style="display:flex; gap:16px; align-items:center; flex-wrap:wrap;">
+
+        <label>
+            Language:
+            <select name="Lang" onchange="resetPageAndSubmit()">
+                <option value="en" selected="@("en" == Model.Lang)">English</option>
+                <option value="ru" selected="@("ru" == Model.Lang)">Русский</option>
+            </select>
+        </label>
+
+        <label>
+            Seed:
+            <input type="number" name="Seed" value="@Model.Seed" onchange="resetPageAndSubmit()" />
+        </label>
+
+        <button type="button" onclick="randomSeed()">🎲</button>
+
+        <label>
+            Avg Likes:
+            <input type="number"
+                   name="Likes"
+                   min="0"
+                   max="10"
+                   step="0.1"
+                   value="@Model.Likes"
+                   onchange="resetPageAndSubmit()" />
+        </label>
+
+        <label>
+            View:
+            <select name="View" onchange="resetPageAndSubmit()">
+                <option value="table" selected="@("table" == Model.View)">Table</option>
+                <option value="gallery" selected="@("gallery" == Model.View)">Gallery</option>
+            </select>
+        </label>
+
+        <input type="hidden" name="PageNumber" value="@Model.PageNumber" />
+    </div>
+</form>
+
+@if (Model.View == "table")
+{
+    <table class="music-table">
+        <thead>
+            <tr>
+                <th></th>
+                <th>#</th>
+                <th>Song</th>
+                <th>Album</th>
+                <th>Genre</th>
+                <th>Likes</th>
+            </tr>
+        </thead>
+
+        <tbody>
+        @foreach (var song in Model.Songs)
+        {
+            <tr class="song-row" onclick="toggleRow(@song.Index)">
+                <td class="arrow">▶</td>
+                <td>@song.Index</td>
+
+                <td class="song-cell">
+                    <img src="@song.CoverUrl" class="cover" />
+                    <div>
+                        <div class="title">@song.Title</div>
+                        <div class="artist">@song.Artist</div>
+                    </div>
+                </td>
+
+                <td>@song.Album</td>
+                <td>@song.Genre</td>
+                <td>❤️ @song.Likes</td>
+            </tr>
+
+            <tr id="details-@song.Index" class="details-row">
+                <td colspan="6">
+
+                    <div class="details-content">
+
+                        <img src="@song.CoverUrl"
+                             class="cover-large"
+                             alt="Cover" />
+
+                        <div class="details-main">
+
+                            <div class="song-title-big">
+                                <strong>@song.Title</strong>
+                            </div>
+
+                            <audio controls preload="none">
+                                <source src="@song.Audio.Url" type="audio/mpeg" />
+                            </audio>
+
+                            <div class="song-meta">
+                                from <strong>@song.Album</strong> by <strong>@song.Artist</strong>
+                            </div>
+
+                            <button class="lyrics-toggle"
+                                    onclick="toggleLyrics(event, @song.Index)">
+                                Show lyrics
+                            </button>
+
+                            <div id="lyrics-@song.Index" class="lyrics collapsed">
+                                @song.Lyrics
+                            </div>
+                        </div>
+
+                    </div>
+
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+
+    <div class="pager">
+        @if (Model.PageNumber > 1)
+        {
+            <a href="?Lang=@Model.Lang&Seed=@Model.Seed&Likes=@Model.Likes&View=table&PageNumber=@(Model.PageNumber - 1)">
+                ⬅ Prev
+            </a>
+        }
+
+        <span>Page @Model.PageNumber</span>
+
+        <a href="?Lang=@Model.Lang&Seed=@Model.Seed&Likes=@Model.Likes&View=table&PageNumber=@(Model.PageNumber + 1)">
+            Next ➡
+        </a>
+    </div>
+}
+else
+{
+    <div id="gallery"
+         style="display:grid;
+                grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+                gap:16px;">
+
+        @foreach (var song in Model.Songs)
+        {
+            <div class="gallery-card"
+                 style="border:1px solid #ddd;
+                        padding:12px;
+                        border-radius:8px;">
+
+                <img src="@song.CoverUrl"
+                     style="width:100%;
+                            border-radius:8px;
+                            margin-bottom:10px;" />
+
+                <h4>@song.Title</h4>
+                <p><strong>@song.Artist</strong></p>
+                <p>@song.Album</p>
+                <p>@song.Genre</p>
+                <p>❤️ @song.Likes</p>
+
+                <audio controls preload="none" style="width:100%;">
+                    <source src="@song.Audio.Url" type="audio/mpeg" />
+                </audio>
+            </div>
+        }
+    </div>
+
+    <div id="loading" style="display:none; text-align:center; padding:20px;">
+        Loading…
+    </div>
+}
+
+<style>
+.music-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 15px;
+}
+
+.music-table th,
+.music-table td {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.song-row {
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.song-row:hover {
+    background: #f5f7fa;
+}
+
+.song-cell {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.cover {
+    width: 48px;
+    height: 48px;
+    border-radius: 6px;
+    object-fit: cover;
+}
+
+.arrow {
+    width: 20px;
+    color: #888;
+    transition: transform 0.2s ease;
+}
+
+.song-row.open .arrow {
+    transform: rotate(90deg);
+}
+
+.details-row {
+    display: none;
+    background: #fafafa;
+}
+
+/* DETAILS */
+.details-content {
+    display: flex;
+    gap: 32px;
+    padding: 20px;
+}
+
+.cover-large {
+    width: 180px;
+    height: 180px;
+    border-radius: 10px;
+    object-fit: cover;
+}
+
+.details-main {
+    flex: 1;
+    max-width: 1000px;
+}
+
+.song-title-big {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 6px;
+}
+
+.details-main audio {
+    width: 100%;
+    margin: 6px 0;
+}
+
+.song-meta {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 8px;
+}
+
+.lyrics-toggle {
+    background: #f0f2f5;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 6px 10px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    margin-bottom: 8px;
+}
+
+.lyrics {
+    white-space: pre-wrap;
+    line-height: 1.5;
+    font-size: 0.9rem;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    background: #fff;
+    padding: 10px;
+    max-width: 100%;
+}
+
+.lyrics.collapsed {
+    max-height: 6.5em;
+    overflow-y: auto;
+}
+
+.pager {
+    margin-top: 20px;
+    display: flex;
+    gap: 16px;
+    align-items: center;
+}
+</style>
+
+<script>
+function resetPageAndSubmit() {
+    const form = document.getElementById("toolbar");
+    form.querySelector("input[name='PageNumber']").value = 1;
+    form.submit();
+}
+
+function randomSeed() {
+    const seed = BigInt(Math.floor(Math.random() * Number.MAX_SAFE_INTEGER));
+    const url = new URL(window.location.href);
+    url.searchParams.set("Seed", seed.toString());
+    url.searchParams.set("PageNumber", "1");
+    window.location.href = url.toString();
+}
+
+function toggleRow(index) {
+    const row = document.getElementById("details-" + index);
+    if (!row) return;
+
+    const mainRow = row.previousElementSibling;
+    const isOpen = row.style.display === "table-row";
+
+    document.querySelectorAll(".details-row")
+        .forEach(r => {
+            r.style.display = "none";
+            r.previousElementSibling?.classList.remove("open");
+        });
+
+    if (!isOpen) {
+        row.style.display = "table-row";
+        mainRow.classList.add("open");
+    }
+}
+
+function toggleLyrics(event, index) {
+    event.stopPropagation();
+
+    const lyrics = document.getElementById("lyrics-" + index);
+    if (!lyrics) return;
+
+    const button = event.target;
+
+    lyrics.classList.toggle("collapsed");
+
+    button.textContent = lyrics.classList.contains("collapsed")
+        ? "Show lyrics"
+        : "Hide lyrics";
+}
+
+/* GALLERY INFINITE SCROLL */
+let galleryPage = @Model.PageNumber;
+let loading = false;
+
+async function loadNextGalleryPage() {
+    if (loading) return;
+    loading = true;
+
+    document.getElementById("loading").style.display = "block";
+
+    const url = new URL(window.location.href);
+    galleryPage++;
+    url.searchParams.set("PageNumber", galleryPage.toString());
+
+    const response = await fetch(url.toString(), {
+        headers: { "X-Requested-With": "XMLHttpRequest" }
+    });
+
+    const html = await response.text();
+    const temp = document.createElement("div");
+    temp.innerHTML = html;
+
+    temp.querySelectorAll(".gallery-card")
+        .forEach(card =>
+            document.getElementById("gallery")?.appendChild(card)
+        );
+
+    document.getElementById("loading").style.display = "none";
+    loading = false;
+}
+
+window.addEventListener("scroll", () => {
+    if ("@Model.View" !== "gallery") return;
+
+    if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 300) {
+        loadNextGalleryPage();
+    }
+});
+</script>
